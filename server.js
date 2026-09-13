@@ -38,6 +38,12 @@ const CRYPTO_MAP = {
   XRP: 'ripple', ADA: 'cardano', BNB: 'binancecoin', LTC: 'litecoin',
 };
 
+// Metals/forex spot symbols, served by goldprice.dev (free, no API key).
+const METAL_MAP = {
+  XAUUSD: 'XAU-USD-SPOT', GOLD: 'XAU-USD-SPOT',
+  XAGUSD: 'XAG-USD-SPOT', SILVER: 'XAG-USD-SPOT',
+};
+
 async function fetchJSON(url, opts) {
   const res = await fetch(url, opts);
   if (!res.ok) {
@@ -54,7 +60,21 @@ async function getQuote(symbol) {
   if (hit) return hit;
 
   let data;
-  if (CRYPTO_MAP[symbol]) {
+  if (METAL_MAP[symbol]) {
+    const sym = METAL_MAP[symbol];
+    const j = await fetchJSON(
+      `https://api.goldprice.dev/v1/prices?symbol=${sym}`
+    );
+    const row = j.symbols?.[0];
+    if (!row) throw new Error(`No data for symbol "${symbol}"`);
+    data = {
+      symbol,
+      type: 'metal',
+      price: row.price,
+      // This free endpoint doesn't include a daily-change figure.
+      changePct: null,
+    };
+  } else if (CRYPTO_MAP[symbol]) {
     const id = CRYPTO_MAP[symbol];
     const j = await fetchJSON(
       `https://api.coingecko.com/api/v3/simple/price?ids=${id}&vs_currencies=usd&include_24hr_change=true`
@@ -92,7 +112,7 @@ async function getNews(symbol) {
   const hit = cacheGet(key);
   if (hit) return hit;
 
-  if (CRYPTO_MAP[symbol] || !FINNHUB_KEY) {
+  if (CRYPTO_MAP[symbol] || METAL_MAP[symbol] || !FINNHUB_KEY) {
     // Finnhub's free tier only covers company news for equities; for crypto
     // (or if no key is configured) we skip straight to general market news.
     if (!FINNHUB_KEY) return [];
@@ -144,7 +164,11 @@ app.post('/api/ask', async (req, res) => {
       ? news.map((n, i) => `${i + 1}. ${n.headline} (${n.source})`).join('\n')
       : 'No recent headlines available from the free news feed.';
 
-    const dirWord = quote.changePct > 0 ? 'up' : quote.changePct < 0 ? 'down' : 'flat';
+    const hasChange = typeof quote.changePct === 'number';
+    const dirWord = !hasChange ? 'unknown' : quote.changePct > 0 ? 'up' : quote.changePct < 0 ? 'down' : 'flat';
+    const changeLine = hasChange
+      ? `24h/1-day change: ${quote.changePct.toFixed(2)}% (${dirWord})`
+      : `24h/1-day change: not available for this symbol (spot price only)`;
     const systemPrompt = `You are a plain-spoken market analyst. You explain price moves using only the data given to you.
 Never invent a headline, number, or event that isn't in the provided context. If the news doesn't clearly explain
 the move, say so plainly and describe what IS known (price action, sector context) instead of guessing.
@@ -152,7 +176,7 @@ Keep answers to 2-4 short paragraphs, no headers, no bullet spam. Sound like a s
 
     const userPrompt = `Symbol: ${sym} (${quote.type})
 Current price: ${quote.price}
-24h/1-day change: ${quote.changePct?.toFixed(2)}% (${dirWord})
+${changeLine}
 Recent headlines:
 ${newsBlock}
 

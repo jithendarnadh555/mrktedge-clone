@@ -10,6 +10,7 @@ the data shown on screen. Everything runs on free tiers, no paid plan needed.
 |---------------------|-----------|-------------------------------------|----------------------------------------|
 | Stock/ETF quotes + news | Finnhub | Free tier (60 calls/min)         | https://finnhub.io/register            |
 | Crypto prices        | CoinGecko | Free, no key required              | (nothing to do)                        |
+| Gold/silver spot price | goldprice.dev | Free, no key required          | (nothing to do)                        |
 | AI "why" answers      | Groq      | Free tier, generous daily quota    | https://console.groq.com/keys          |
 
 You only need to sign up for Finnhub and Groq — both take under two minutes,
@@ -44,7 +45,8 @@ no credit card required.
 ## Using it
 
 - Type a symbol in the top-right box: stock tickers like `AAPL`, `TSLA`,
-  `NVDA`, or crypto like `BTC`, `ETH`, `SOL`.
+  `NVDA`, crypto like `BTC`, `ETH`, `SOL`, or metals like `XAUUSD` (gold) and
+  `XAGUSD` (silver).
 - The strip below the header shows the live price and change.
 - The right-hand panel lists recent headlines for that symbol.
 - Ask a question in the chat box, e.g. "why is it down today" or "what's the
@@ -110,7 +112,3 @@ mrktedge-clone/
     ├── styles.css
     └── app.js
 ```
-# mrktedge-clone
-# mrktedge-clone
-# mrktedge-clone
-# mrktedge-clone

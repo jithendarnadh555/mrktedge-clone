@@ -31,7 +31,9 @@ function renderQuote(symbol, quote) {
   tapePrice.textContent = fmtPrice(quote.price, quote.type);
   tapeChange.textContent = fmtPct(quote.changePct);
   tapeChange.className = 'tape-change ' + (quote.changePct > 0 ? 'up' : quote.changePct < 0 ? 'down' : '');
-  tapeMeta.textContent = quote.type === 'crypto' ? '24h change · CoinGecko' : 'vs. prior close · Finnhub';
+  if (quote.type === 'crypto') tapeMeta.textContent = '24h change · CoinGecko';
+  else if (quote.type === 'metal') tapeMeta.textContent = 'spot price, no daily change · goldprice.dev';
+  else tapeMeta.textContent = 'vs. prior close · Finnhub';
 }
 
 function renderNews(items) {
