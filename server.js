@@ -15,7 +15,7 @@ const path = require('path');
 
 const FINNHUB_KEY = process.env.FINNHUB_API_KEY || '';
 const GROQ_KEY = process.env.GROQ_API_KEY || '';
-const GROQ_MODEL = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
+const GROQ_MODEL = process.env.GROQ_MODEL || 'openai/gpt-oss-120b';
 
 const app = express();
 app.use(express.json());
