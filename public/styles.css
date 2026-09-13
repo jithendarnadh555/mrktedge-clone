@@ -267,6 +267,88 @@ button:focus-visible {
   font-size: 0.92rem;
 }
 
+/* ---------- trade plan ---------- */
+
+.plan-block {
+  margin-top: 1.75rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--rule);
+}
+
+.plan-sub {
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin: 0 0 1rem;
+}
+
+.plan-btn {
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 0.6rem 1.1rem;
+  border: 1px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  border-radius: 3px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.plan-btn:hover { background: var(--ink); color: var(--accent-ink); }
+.plan-btn:disabled { opacity: 0.5; cursor: wait; }
+
+.plan-result { margin-top: 1rem; }
+
+.plan-bias {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.25rem 0.6rem;
+  border-radius: 3px;
+  margin-bottom: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.plan-bias.bullish { background: #dcece3; color: var(--gain); }
+.plan-bias.bearish { background: #f2ddd6; color: var(--loss); }
+.plan-bias.neutral { background: var(--paper); color: var(--ink-soft); border: 1px solid var(--rule); }
+
+.plan-reasoning {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0 0 1rem;
+}
+
+.plan-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  margin-bottom: 0.75rem;
+}
+
+.plan-table td {
+  padding: 0.4rem 0;
+  border-bottom: 1px dashed var(--rule);
+}
+
+.plan-table td:first-child { color: var(--ink-soft); }
+.plan-table td:last-child { text-align: right; font-weight: 600; }
+.plan-table .row-loss td:last-child { color: var(--loss); }
+.plan-table .row-gain td:last-child { color: var(--gain); }
+
+.plan-note, .plan-error {
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  font-style: italic;
+}
+
+.plan-error { color: var(--loss); }
+
 /* ---------- footer ---------- */
 
 .footer {

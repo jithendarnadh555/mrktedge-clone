@@ -11,6 +11,7 @@ the data shown on screen. Everything runs on free tiers, no paid plan needed.
 | Stock/ETF quotes + news | Finnhub | Free tier (60 calls/min)         | https://finnhub.io/register            |
 | Crypto prices        | CoinGecko | Free, no key required              | (nothing to do)                        |
 | Gold/silver spot price | goldprice.dev | Free, no key required          | (nothing to do)                        |
+| Forex rates          | open.er-api.com | Free, no key required        | (nothing to do)                        |
 | AI "why" answers      | Groq      | Free tier, generous daily quota    | https://console.groq.com/keys          |
 
 You only need to sign up for Finnhub and Groq — both take under two minutes,
@@ -45,13 +46,19 @@ no credit card required.
 ## Using it
 
 - Type a symbol in the top-right box: stock tickers like `AAPL`, `TSLA`,
-  `NVDA`, crypto like `BTC`, `ETH`, `SOL`, or metals like `XAUUSD` (gold) and
-  `XAGUSD` (silver).
+  `NVDA`, crypto like `BTC`, `ETH`, `SOL`, metals like `XAUUSD` (gold) and
+  `XAGUSD` (silver), or forex pairs like `EURUSD`, `GBPUSD`, `USDJPY`.
 - The strip below the header shows the live price and change.
 - The right-hand panel lists recent headlines for that symbol.
 - Ask a question in the chat box, e.g. "why is it down today" or "what's the
   sentiment right now" — the AI answers using only the price and headlines
   already shown, and says so plainly if the news doesn't explain the move.
+- Click **Get trade plan** for a bullish/bearish/neutral read plus a stop-loss
+  and take-profit for a 0.01 lot sized to risk exactly $5 either way (1:1
+  reward-to-risk). This is a generated read from limited free-tier data, not
+  financial advice — the position-sizing math also assumes common broker
+  conventions (see note under each result) that may not match your actual
+  broker's contract specs.
 
 ## Deploying it for free (GitHub + Render)
 

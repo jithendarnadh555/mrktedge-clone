@@ -5,6 +5,9 @@ const askInput = document.getElementById('askInput');
 const askBtn = document.getElementById('askBtn');
 const chatLog = document.getElementById('chatLog');
 
+const planBtn = document.getElementById('planBtn');
+const planResult = document.getElementById('planResult');
+
 const tapeSymbol = document.getElementById('tapeSymbol');
 const tapePrice = document.getElementById('tapePrice');
 const tapeChange = document.getElementById('tapeChange');
@@ -16,7 +19,9 @@ let chatHistory = []; // {role, content} pairs sent back to the model for follow
 
 function fmtPrice(v, type) {
   if (v == null || Number.isNaN(v)) return '—';
-  const decimals = type === 'crypto' && v < 1 ? 4 : 2;
+  let decimals = 2;
+  if (type === 'crypto' && v < 1) decimals = 4;
+  if (type === 'forex') decimals = v < 10 ? 4 : 2;
   return `$${v.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}`;
 }
 
@@ -28,11 +33,16 @@ function fmtPct(v) {
 
 function renderQuote(symbol, quote) {
   tapeSymbol.textContent = symbol;
-  tapePrice.textContent = fmtPrice(quote.price, quote.type);
+  if (quote.type === 'forex') {
+    tapePrice.textContent = `${fmtLevel(quote.price, 'forex')} ${quote.quoteCcy}`;
+  } else {
+    tapePrice.textContent = fmtPrice(quote.price, quote.type);
+  }
   tapeChange.textContent = fmtPct(quote.changePct);
   tapeChange.className = 'tape-change ' + (quote.changePct > 0 ? 'up' : quote.changePct < 0 ? 'down' : '');
   if (quote.type === 'crypto') tapeMeta.textContent = '24h change · CoinGecko';
   else if (quote.type === 'metal') tapeMeta.textContent = 'spot price, no daily change · goldprice.dev';
+  else if (quote.type === 'forex') tapeMeta.textContent = 'daily reference rate, no intraday change · open.er-api.com';
   else tapeMeta.textContent = 'vs. prior close · Finnhub';
 }
 
@@ -70,6 +80,7 @@ function addMessage(kind, text) {
 async function loadSymbol(symbol) {
   currentSymbol = symbol;
   chatHistory = [];
+  planResult.innerHTML = '';
   tapeSymbol.textContent = symbol;
   tapePrice.textContent = 'loading…';
   tapeChange.textContent = '';
@@ -88,6 +99,58 @@ async function loadSymbol(symbol) {
     newsList.innerHTML = `<li class="news-empty">${err.message}</li>`;
   }
 }
+
+function fmtLevel(v, type) {
+  if (v == null || Number.isNaN(v)) return '—';
+  let decimals = 2;
+  if (type === 'forex') decimals = Math.abs(v) < 10 ? 5 : 3;
+  if (type === 'crypto' && v < 1) decimals = 6;
+  return v.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+}
+
+function renderPlan(data) {
+  const biasClass = data.bias;
+  let html = `<span class="plan-bias ${biasClass}">${data.bias}</span> <span style="font-size:0.8rem;color:var(--ink-soft)">confidence: ${data.confidence}</span>`;
+  html += `<p class="plan-reasoning">${data.reasoning}</p>`;
+
+  if (data.plan.side === 'none') {
+    html += `<p class="plan-note">${data.plan.note}</p>`;
+  } else {
+    const t = data.quote.type;
+    html += `<table class="plan-table">
+      <tr><td>Side</td><td>${data.plan.side.toUpperCase()}</td></tr>
+      <tr><td>Lot size</td><td>${data.plan.lot}</td></tr>
+      <tr><td>Entry</td><td>${fmtLevel(data.plan.entry, t)}</td></tr>
+      <tr class="row-loss"><td>Stop loss</td><td>${fmtLevel(data.plan.stopLoss, t)} (&minus;$${data.plan.riskUsd})</td></tr>
+      <tr class="row-gain"><td>Take profit</td><td>${fmtLevel(data.plan.takeProfit, t)} (+$${data.plan.rewardUsd})</td></tr>
+    </table>
+    <p class="plan-note">${data.plan.note}. Verify against your broker's actual contract size before trading &mdash; this is not financial advice.</p>`;
+  }
+  planResult.innerHTML = html;
+}
+
+planBtn.addEventListener('click', async () => {
+  if (!currentSymbol) {
+    planResult.innerHTML = '<p class="plan-error">Look up a symbol first.</p>';
+    return;
+  }
+  planBtn.disabled = true;
+  planResult.innerHTML = '<p class="plan-note">Thinking…</p>';
+  try {
+    const res = await fetch('/api/plan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ symbol: currentSymbol, riskUsd: 5 }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Something went wrong');
+    renderPlan(data);
+  } catch (err) {
+    planResult.innerHTML = `<p class="plan-error">${err.message}</p>`;
+  } finally {
+    planBtn.disabled = false;
+  }
+});
 
 tickerForm.addEventListener('submit', (e) => {
   e.preventDefault();
